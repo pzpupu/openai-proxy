@@ -12,8 +12,8 @@ var secret = []byte("your-secret-key")
 func CreateJwt(name string) string {
 	// 创建自定义声明（Payload）
 	claims := jwt.MapClaims{
-		"username": name,
-		"exp":      time.Now().Add(time.Hour * 24 * 365).Unix(), // 设置过期时间为1年后过期
+		"name": name,
+		"exp":  time.Now().Add(time.Hour * 24 * 365).Unix(), // 设置过期时间为1年后过期
 	}
 
 	// 使用密钥签名JWT
@@ -29,12 +29,18 @@ func CreateJwt(name string) string {
 	return tokenString
 }
 
-func ValidJwt(tokenString string) bool {
+func ValidJwt(tokenString string) *string {
 	// 解析和校验JWT
 	parsedToken, _ := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		return secret, nil
 	})
-	return parsedToken.Valid
+	claims := parsedToken.Claims.(jwt.MapClaims)
+	if parsedToken.Valid {
+		name := claims["name"].(string)
+		return &name
+	}
+	return nil
+
 }
 
 //func main() {
