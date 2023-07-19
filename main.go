@@ -52,6 +52,10 @@ func main() {
 	//	log.Printf("Response size: %d bytes\n", resp.ContentLength)
 	//	return nil
 	//}
+	proxy.ErrorHandler = func(writer http.ResponseWriter, request *http.Request, e error) {
+		capture := writer.(*responseCapture)
+		log.Printf("%s Proxy %s Error: %s \n", capture.name, capture.path, e)
+	}
 
 	// 添加中间件，用于记录每个请求的响应数据大小
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -75,12 +79,15 @@ func main() {
 		w.WriteHeader(401)
 	})
 
-	// 启动代理服务器
-	log.Println("Starting reverse proxy on :8080")
-	err = http.ListenAndServe(":8080", handler)
-	if err != nil {
-		log.Fatal(err)
+	// 创建HTTP服务器
+	server := &http.Server{
+		Addr:    ":8080",
+		Handler: handler,
 	}
+
+	// 启动服务器
+	log.Println("Proxy server listening on :8080")
+	log.Fatal(server.ListenAndServe())
 }
 
 // 自定义响应捕获器，用于记录响应数据大小
