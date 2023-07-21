@@ -1,5 +1,8 @@
 # Open AI 网关代理（用于记录更详细的数据使用情况）
 
+1. 记录用户每个请求使用的 API 以及使用的次数及流量情况。
+
+
 ## 编译
 
 ### 代理程序
@@ -35,3 +38,20 @@ docker compose up -d 即可启动代理程序。
 通过 `./jwt-xxx` 执行程序，并输入用户名，即可生成 token。
 
 > 用户名为记录用户使用情况的唯一标识，可自行定义。
+
+## 使用
+
+理论上完美兼容OpenAI接口,可以做到平替
+
+### 环境变量
+```
+OPENAI_API_KEY=jwt token
+OPENAI_API_BASE=http://52.64.53.125:8080/v1
+```
+
+### python OpenAi 库
+```python
+import openai
+openai.api_key = "jwt token"
+openai.api_base = "http://52.64.53.125:8080/v1"
+```
