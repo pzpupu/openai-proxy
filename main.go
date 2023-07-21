@@ -14,8 +14,6 @@ import (
 )
 
 func main() {
-	jwt.CreateJwt("TestUser")
-
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal(err)

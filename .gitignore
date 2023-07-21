@@ -22,3 +22,4 @@ go.work
 
 .idea/
 /postgres_data/
+/build/
