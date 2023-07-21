@@ -55,3 +55,12 @@ import openai
 openai.api_key = "jwt token"
 openai.api_base = "http://52.64.53.125:8080/v1"
 ```
+
+## 用到的技术
+
+1. ReverseProxy golang 中自带的反向代理
+2. golang-jwt jwt生成与校验
+3. godotenv 读取.env文件
+4. pq 数据库驱动
+5. docker 环境部署
+6. docker-compose 多容器部署
