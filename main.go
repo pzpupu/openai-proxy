@@ -23,6 +23,8 @@ func main() {
 
 	OpenApiKey := os.Getenv("OPEN_API_KEY")
 	log.Println("OPEN_API_KEY: ", OpenApiKey)
+	SecretKey := os.Getenv("SECRET_KEY")
+	jwt.Secret = []byte(SecretKey)
 
 	// 初始化数据库
 	database.Init()

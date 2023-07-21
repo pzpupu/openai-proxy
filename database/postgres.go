@@ -11,7 +11,7 @@ var db *sql.DB
 
 func Init() {
 	// 连接数据库
-	db_, err := sql.Open("postgres", "postgres://postgres:Forever0.@localhost:5432/?sslmode=disable")
+	db_, err := sql.Open("postgres", "postgres://postgres:Forever0.@postgres:5432/?sslmode=disable")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -23,6 +23,14 @@ func Init() {
 		log.Fatal(err)
 	}
 	log.Println("Connected to PostgreSQL database!")
+
+	// 检查表是否存在，不存在则自动建表
+	_, err = db.Exec("CREATE TABLE IF NOT EXISTS flow_record (id SERIAL PRIMARY KEY, name VARCHAR(20), path VARCHAR(255), req_count integer, res_count integer, created_time timestamp default CURRENT_TIMESTAMP)")
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Println("Table created successfully!")
+
 }
 
 func Insert(user string, path string, reqCount int64, resCount int64) {

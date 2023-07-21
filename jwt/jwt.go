@@ -6,8 +6,8 @@ import (
 	"time"
 )
 
-// 设置密钥
-var secret = []byte("your-secret-key")
+// JWT 密钥
+var Secret = []byte("")
 
 func CreateJwt(name string) string {
 	// 创建自定义声明（Payload）
@@ -20,7 +20,7 @@ func CreateJwt(name string) string {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
 	// 生成最终的JWT字符串
-	tokenString, err := token.SignedString(secret)
+	tokenString, err := token.SignedString(Secret)
 	if err != nil {
 		fmt.Println("Failed to generate JWT:", err)
 		return ""
@@ -32,7 +32,7 @@ func CreateJwt(name string) string {
 func ValidJwt(tokenString string) *string {
 	// 解析和校验JWT
 	parsedToken, _ := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		return secret, nil
+		return Secret, nil
 	})
 	claims := parsedToken.Claims.(jwt.MapClaims)
 	if parsedToken.Valid {
@@ -42,8 +42,3 @@ func ValidJwt(tokenString string) *string {
 	return nil
 
 }
-
-//func main() {
-//	tokenString := CreateJwt("TestUser")
-//	ValidJwt(tokenString + "1")
-//}
