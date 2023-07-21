@@ -2,16 +2,26 @@ package main
 
 import (
 	"fmt"
+	"github.com/joho/godotenv"
+	"log"
 	"openai-proxy/jwt"
+	"os"
 )
 
 func main() {
-	println("Please enter your username:")
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal(err)
+	}
+	SecretKey := os.Getenv("SECRET_KEY")
+	jwt.Secret = []byte(SecretKey)
+
+	log.Println("Please enter your username:")
 	var line string
-	_, err := fmt.Scanln(&line)
+	_, err = fmt.Scanln(&line)
 	if err != nil {
 		return
 	}
-	fmt.Printf("Your input username is: %s \n", line)
+	log.Printf("Your input username is: %s \n", line)
 	jwt.CreateJwt(line)
 }

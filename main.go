@@ -37,7 +37,15 @@ func main() {
 
 	// 创建反向代理的处理程序
 	proxy := httputil.NewSingleHostReverseProxy(targetURL)
-	//originalDirector := proxy.Director
+
+	// 解决在容器中报x509:certificate signed by unknown authority
+	//proxy.Transport = &http.Transport{TLSClientConfig: &tls.Config{
+	//	// InsecureSkipVerify 控制client端是否验证服务器的证书链和主机名，
+	//	// 如果InsecureSkipVerify为true, crypto/tls接受服务器提供的任务和证书中的任何主机名
+	//	// 在这种模式下，tls容易收到中间机器的攻击，除非是用自定义认证，建议只用于测试或者与VerifyConnection或VerifyPeerCertificate一起使用
+	//	InsecureSkipVerify: true,
+	//}}
+
 	proxy.Director = func(req *http.Request) {
 		//originalDirector(req)
 		req.URL.Scheme = targetURL.Scheme
