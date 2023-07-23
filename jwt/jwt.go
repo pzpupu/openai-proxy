@@ -31,11 +31,15 @@ func CreateJwt(name string) string {
 
 func ValidJwt(tokenString string) *string {
 	// 解析和校验JWT
-	parsedToken, _ := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+	parsedToken, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		return Secret, nil
 	})
-	claims := parsedToken.Claims.(jwt.MapClaims)
+	if err != nil {
+		fmt.Println("Failed to parse JWT:", tokenString, err)
+		return nil
+	}
 	if parsedToken.Valid {
+		claims := parsedToken.Claims.(jwt.MapClaims)
 		name := claims["name"].(string)
 		return &name
 	}
