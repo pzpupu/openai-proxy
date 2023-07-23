@@ -1,8 +1,13 @@
 package main
 
 import (
+	"bytes"
+	"compress/gzip"
+	"encoding/binary"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
+	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"net/http/httputil"
@@ -67,6 +72,13 @@ func main() {
 
 	// 添加中间件，用于记录每个请求的响应数据大小
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		body, err := io.ReadAll(r.Body)
+		if err != nil {
+			http.Error(w, "Error reading request body", http.StatusInternalServerError)
+			return
+		}
+		// 日志记录请求数据
+		log.Printf("Request: %s %s, Headers: %s,Body: %s \n", r.Method, r.URL, r.Header, body)
 		authorization := r.Header.Get("Authorization")
 		// 自定义的令牌校验
 		if authorization != "" {
@@ -75,6 +87,11 @@ func main() {
 			if len(stringSlice) >= 1 {
 				name := jwt.ValidJwt(stringSlice[1])
 				if name != nil {
+
+					// 将处理后的请求主体写入新的请求
+					r.Body = io.NopCloser(bytes.NewBuffer(body))
+					r.ContentLength = int64(len(body))
+
 					// 创建一个响应捕获器
 					captureResponse := &responseCapture{ResponseWriter: w, reqCount: r.ContentLength, name: *name, path: r.URL.Path}
 					// 代理转发请求
@@ -107,8 +124,34 @@ type responseCapture struct {
 }
 
 func (r *responseCapture) Write(b []byte) (int, error) {
+	contentEncoding := r.ResponseWriter.Header().Get("Content-Encoding")
+	if contentEncoding == "gzip" {
+		parseGzip, _ := ParseGzip(b)
+		log.Printf("%s Request %s, request size %d bytes, response size: %d bytes, Body: %s\n", r.name, r.path, r.reqCount, len(b), string(parseGzip))
+	} else {
+		log.Printf("%s Request %s, request size %d bytes, response size: %d bytes\n", r.name, r.path, r.reqCount, len(b))
+	}
 	// 记录响应数据大小
-	log.Printf("%s Request %s, request size %d bytes, response size: %d bytes\n", r.name, r.path, r.reqCount, len(b))
+
 	database.Insert(r.name, r.path, r.reqCount, int64(len(b)))
+	r.ResponseWriter.Header()
 	return r.ResponseWriter.Write(b)
+}
+
+func ParseGzip(data []byte) ([]byte, error) {
+	b := new(bytes.Buffer)
+	binary.Write(b, binary.LittleEndian, data)
+	r, err := gzip.NewReader(b)
+	if err != nil {
+		log.Printf("[ParseGzip] NewReader error: %v, maybe data is ungzip \n", err)
+		return nil, err
+	} else {
+		defer r.Close()
+		undatas, err := ioutil.ReadAll(r)
+		if err != nil {
+			log.Printf("[ParseGzip]  ioutil.ReadAll error: %v \n", err)
+			return nil, err
+		}
+		return undatas, nil
+	}
 }

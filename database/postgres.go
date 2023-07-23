@@ -3,6 +3,7 @@ package database
 import (
 	"database/sql"
 	"log"
+	"os"
 
 	_ "github.com/lib/pq"
 )
@@ -10,8 +11,10 @@ import (
 var db *sql.DB
 
 func Init() {
+	DbHost := os.Getenv("DB_HOST")
+	log.Println("DB_HOST: ", DbHost)
 	// 连接数据库
-	db_, err := sql.Open("postgres", "postgres://postgres:Forever0.@postgres:5432/?sslmode=disable")
+	db_, err := sql.Open("postgres", "postgres://postgres:Forever0.@"+DbHost+":5432/?sslmode=disable")
 	if err != nil {
 		log.Fatal("Connected to PostgreSQL Error: ", err)
 	}
