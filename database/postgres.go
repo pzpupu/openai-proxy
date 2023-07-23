@@ -13,14 +13,14 @@ func Init() {
 	// 连接数据库
 	db_, err := sql.Open("postgres", "postgres://postgres:Forever0.@postgres:5432/?sslmode=disable")
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("Connected to PostgreSQL Error: ", err)
 	}
 	db = db_
 
 	// 检查数据库连接
 	err = db.Ping()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("Check PostgreSQL Connected Error: ", err)
 	}
 	log.Println("Connected to PostgreSQL database!")
 
